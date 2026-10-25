@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>СМИ-Helper</title>
+    <style>
+        :root {
+            --primary: #bf8bff; 
+            --primary-glow: rgba(191, 139, 255, 0.4);
+            --success: #2ecc71; 
+            --danger: #e74c3c; 
+            --bg: #1e1233; 
+            --card-bg: linear-gradient(145deg, #3d2563 0%, #251240 100%); 
+            --text: #ffffff; 
+            --text-muted: #cdbfe6;
+            --category-bg: #4c3275;
+            --border-color: #a872f0;
+            --neon-green: #2ecc71;
+            --neon-green-glow: rgba(46, 204, 113, 0.35);
+            --neon-green-bg: linear-gradient(135deg, #1b4d22 0%, #143519 100%);
+        }
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 20px 20px 40px 20px; display: flex; flex-direction: column; align-items: center;
+            overflow-y: scroll;
+        }
+        .container {
+            width: 100%; max-width: 500px; background: var(--card-bg); padding: 25px 25px 35px 25px; border-radius: 20px; border: 2px solid var(--border-color); box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), 0 0 25px rgba(168, 114, 240, 0.25); box-sizing: border-box; margin-bottom: 25px; position: relative;
+        }
+        .counter-badge {
+            position: absolute; 
+            bottom: -13px; 
+            right: 25px; 
+            font-size: 10px; 
+            color: var(--text-muted); 
+            font-weight: 500; 
+            letter-spacing: 0.3px; 
+            opacity: 1; 
+            background: #1e1233; 
+            padding: 3px 10px; 
+            border-radius: 20px; 
+            border: 2px solid var(--border-color);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+            z-index: 99;
+        }
+        .counter-badge span { color: var(--primary); font-weight: 600; }
+        h3 { margin-top: 0; margin-bottom: 15px; color: #dcbfff; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; text-align: center; text-shadow: 0 0 8px rgba(191, 139, 255, 0.3); }
+        .section { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(203, 158, 255, 0.15); border-radius: 12px; padding: 15px; margin-bottom: 20px; box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.2); position: relative; z-index: 1; }
+        .section:last-of-type { margin-bottom: 0; }
+        input[type="text"], select { width: 100%; padding: 10px; border: 2px solid #5a3b8c; border-radius: 8px; font-size: 14px; box-sizing: border-box; text-align: center; color: #fff; background: #25143a; transition: all 0.2s ease; }
+        input[type="text"]:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 10px var(--primary-glow); outline: none; }
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 500; font-size: 13px; text-align: center; color: var(--text-muted); }
+        .controls-group { display: flex; gap: 10px; margin-bottom: 10px; }
+        .accordion-toggle { background: #8546d4; color: white; padding: 12px; flex-grow: 1; border: none; border-radius: 8px; text-align: left; font-size: 14px; cursor: pointer; font-weight: 600; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 12px rgba(133, 70, 212, 0.3); transition: background 0.2s; }
+        .accordion-toggle:hover { background: #9b5de5; }
+        .btn-add-main { background: var(--success); color: white; border: none; padding: 0 15px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; transition: background 0.2s; box-shadow: 0 4px 12px rgba(46, 204, 113, 0.3); }
+        .btn-add-main:hover { background: #27ae60; }
+        .accordion-content { display: none; max-height: 250px; overflow-y: auto; border: 1px solid #5a3b8c; border-radius: 8px; background: #25143a; scrollbar-width: none; -ms-overflow-style: none; }
+        .accordion-content.open { display: block; }
+        .result-list { max-height: 250px; overflow-y: auto; padding: 5px; scrollbar-width: none; -ms-overflow-style: none; }
+        .accordion-content::-webkit-scrollbar, .result-list::-webkit-scrollbar { display: none; width: 0 !important; height: 0 !important; background: transparent; }
+        .car-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid rgba(203, 158, 255, 0.1); gap: 15px; font-size: 14px; }
+        .car-item:last-child { border-bottom: none; }
+        .car-names { display: flex; flex-direction: column; flex-grow: 1; align-items: flex-start; min-width: 0; }
+        .car-names div { width: 100%; word-break: break-word; overflow-wrap: break-word; color: #fff; line-height: 1.3; }
+        .item-number { color: var(--primary); font-weight: 600; margin-right: 4px; }
+        .car-actions-row { display: flex; gap: 4px; flex-shrink: 0; }
+        .btn-action { background: transparent; border: none; width: 28px; height: 28px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 13px; opacity: 0.6; transition: all 0.2s ease; padding: 0; }
+        .btn-action-edit:hover { opacity: 1; background: rgba(255, 255, 255, 0.1); }
+        .btn-action-delete:hover { opacity: 1; background: rgba(231, 76, 60, 0.2); }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(4px); }
+        .modal-content { background: #2d1847; padding: 20px; border-radius: 12px; width: 320px; box-shadow: 0 15px 30px rgba(0,0,0,0.5); text-align: center; border: 2px solid var(--border-color); color: #fff; }
+        .modal-content h4 { margin-top: 0; font-size: 15px; font-weight: 600; color: #fff; }
+        .modal-actions { margin-top: 15px; display: flex; justify-content: center; gap: 10px; }
+        .btn-save { background: var(--success); color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; }
+        .btn-cancel { background: #7f8c8d; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-size: 13px; }
+        .category-header { background: var(--category-bg); padding: 5px 10px; font-weight: 600; font-size: 11px; color: #dfcfff; text-transform: uppercase; border-radius: 6px; margin-top: 12px; margin-bottom: 6px; text-align: center; letter-spacing: 0.5px; border: 1px solid rgba(255, 255, 255, 0.1); }
+        .category-header:first-child { margin-top: 0; }
+        .result-item { padding: 8px 10px; border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 6px; margin-bottom: 6px; background: #25143a; text-align: center; font-size: 13px; color: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.2); word-break: break-word; overflow-wrap: break-word; line-height: 1.3; transition: all 0.2s ease; }
+        .result-item.highlight { background: var(--neon-green-bg) !important; border: 2px solid var(--neon-green); font-weight: 600; color: #fff; box-shadow: 0 0 15px var(--neon-green-glow); text-shadow: 0 0 5px rgba(255, 255, 255, 0.6); }
+        .result-custom-name { color: #bf8bff; font-style: italic; font-weight: normal; font-size: 12px; }
+        .result-item.highlight .result-custom-name { color: #a3e2bc; }
+        .type-badge { font-size: 10px; background: linear-gradient(135deg, #5a3b8c, #3d2563); color: #dcbfff; padding: 1px 8px; border-radius: 12px; width: fit-content; margin-bottom: 3px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .custom-name { font-size: 12px; color: #bcaad4; font-style: italic; }
+        .empty-msg { color: #8f7da8; font-style: italic; text-align: center; padding: 20px 10px; font-size: 13px; }
+        .footer-text { text-align: center; font-size: 11px; color: #786494; letter-spacing: 0.5px; padding-top: 15px; font-weight: 500; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="counter-badge">Наименований занесено в базу: <span id="totalCounter">0</span></div>
+
+    <div class="section">
+        <h3>Поиск:</h3>
+        <input type="text" id="searchInput" placeholder="Введи название транспорта.">
+    </div>
+
+    <div class="section">
+        <h3>База данных транспорта.</h3>
+        <div class="controls-group">
+            <button class="accordion-toggle" id="toggleAccordion">
+                <span>Открыть список транспорта.</span>
+                <span id="arrow">▼</span>
+            </button>
+            <button class="btn-add-main" id="btnOpenAddModal">+ Добавить.</button>
+        </div>
+        <div class="accordion-content" id="accordionContent"></div>
+    </div>
+
+    <div class="section">
+        <h3>Результат поиска:</h3>
+        <div id="resultOutput" class="result-list">
+            <div class="empty-msg">Введи запрос в окошко поиска.</div>
+        </div>
+    </div>
+</div>
+
+<div class="footer-text"> Grand Mobile
+Сервер: А буй вам!</div>
+
+<div class="modal" id="editModal">
+    <div class="modal-content">
+        <h4 id="modalTitle">Редактор триггеров.</h4>
+        <div class="form-group">
+            <input type="text" id="customNameInput" placeholder="Триггер.">
+        </div>
+        <div class="modal-actions">
+            <button class="btn-cancel" onclick="closeModal('editModal')">Отмена.</button>
+            <button class="btn-save" id="btnSaveEdit">Сохранить.</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="addModal">
+    <div class="modal-content">
+        <h4>Добавить транспорт.</h4>
+        <div class="form-group">
+            <label>Название:</label>
+            <input type="text" id="newCarNameInput" placeholder="Например: Ford Mustang.">
+        </div>
+        <div class="form-group">
+            <label>Тип транспорта:</label>
+            <select id="typeSelect">
+                <option value="Автомобиль.">Автомобиль.</option>
+                <option value="Мотоцикл.">Мотоцикл.</option>
+                <option value="Вертолёт.">Вертолёт.</option>
+                <option value="Скейтборд.">Скейтборд.</option>
+                <option value="Джетпак.">Джетпак.</option>
+            </select>
+        </div>
+        <div class="modal-actions">
+            <button class="btn-cancel" onclick="closeModal('addModal')">Отмена.</button>
+            <button class="btn-save" id="btnSaveNewCar">Добавить.</button>
+        </div>
+    </div>
+</div>
+<script>
+    const defaultTransport = [
+        { id: 1, originalName: "Audio 1", customName: "", type: "Автомобиль." },
+        { id: 2, originalName: "Audio 3", customName: "", type: "Автомобиль." },
+        { id: 3, originalName: "Audio 2", customName: "", type: "Автомобиль." },
+        { id: 4, originalName: "Skeyt 2", customName: "", type: "Скейтборд." },
+        { id: 5, originalName: "Skeyt 1", customName: "", type: "Скейтборд." },
+        { id: 6, originalName: "Yamaha R1", customName: "", type: "Мотоцикл." },
+        { id: 7, originalName: "Apache AH-64", customName: "", type: "Вертолёт." }
+    ];
+
+    let transportList = JSON.parse(localStorage.getItem('myTransportData')) || defaultTransport;
+    let currentEditingId = null;
+
+    const searchInput = document.getElementById('searchInput');
+    const toggleAccordion = document.getElementById('toggleAccordion');
+    const accordionContent = document.getElementById('accordionContent');
+    const arrow = document.getElementById('arrow');
+    const resultOutput = document.getElementById('resultOutput');
+    const editModal = document.getElementById('editModal');
+    const addModal = document.getElementById('addModal');
+    const customNameInput = document.getElementById('customNameInput');
+    const newCarNameInput = document.getElementById('newCarNameInput');
+    const typeSelect = document.getElementById('typeSelect');
+    const modalTitle = document.getElementById('modalTitle');
+    const totalCounter = document.getElementById('totalCounter');
+
+    function saveToStorage() { localStorage.setItem('myTransportData', JSON.stringify(transportList)); }
+    function alphabetSort(a, b) { return a.originalName.localeCompare(b.originalName, 'ru', { numeric: true }); }
+
+    function updateCounter() {
+        totalCounter.textContent = transportList.length;
+    }
+
+    function renderTransportList() {
+        accordionContent.innerHTML = '';
+        const sortedList = [...transportList].sort(alphabetSort);
+        sortedList.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.className = 'car-item';
+            const nameSpan = item.customName ? `${item.originalName} <span class="custom-name">(${item.customName})</span>` : item.originalName;
+            div.innerHTML = `
+                <div class="car-names">
+                    <span class="type-badge">${item.type}</span>
+                    <div><span class="item-number">${index + 1}.</span>${nameSpan}</div>
+                </div>
+                <div class="car-actions-row">
+                    <button class="btn-action btn-action-edit" onclick="openEditModal(${item.id})">✏️</button>
+                    <button class="btn-action btn-action-delete" onclick="deleteCar(${item.id})">🗑️</button>
+                </div>
+            `;
+            accordionContent.appendChild(div);
+        });
+        updateCounter();
+    }
+    function renderResults() {
+        const query = searchInput.value.trim().toLowerCase();
+        if (!query) { resultOutput.innerHTML = '<div class="empty-msg">Введи запрос в окошко поиска.</div>'; return; }
+        
+        const filtered = transportList.filter(item => {
+            return item.originalName.toLowerCase().includes(query) || (item.customName && item.customName.toLowerCase().includes(query));
+        });
+        
+        if (filtered.length === 0) { resultOutput.innerHTML = '<div class="empty-msg">Ничего не найдено.</div>'; return; }
+        resultOutput.innerHTML = ''; const grouped = {};
+        filtered.forEach(item => { if (!grouped[item.type]) grouped[item.type] = []; grouped[item.type].push(item); });
+        const sortedCategories = Object.keys(grouped).sort((a, b) => a.localeCompare(b, 'ru'));
+        sortedCategories.forEach(type => {
+            const header = document.createElement('div'); header.className = 'category-header'; header.textContent = `— ${type} —`; resultOutput.appendChild(header);
+            const sortedItems = grouped[type].sort(alphabetSort);
+            sortedItems.forEach(item => {
+                const div = document.createElement('div'); div.className = 'result-item';
+                if (item.originalName.toLowerCase() === query || (item.customName && item.customName.toLowerCase() === query)) div.classList.add('highlight');
+                
+                if (item.customName) {
+                    div.innerHTML = `${item.originalName} <span class="result-custom-name">(${item.customName})</span>`;
+                } else {
+                    div.textContent = item.originalName;
+                }
+                resultOutput.appendChild(div);
+            });
+        });
+    }
+
+    window.deleteCar = function(id) {
+        const confirmDelete = confirm('Ты уверен(а), что хочешь удалить этот транспорт из базы данных?');
+        if (confirmDelete) {
+            transportList = transportList.filter(item => item.id !== id);
+            saveToStorage();
+            renderTransportList();
+            renderResults();
+        }
+    };
+
+    toggleAccordion.addEventListener('click', () => { const isOpen = accordionContent.classList.toggle('open'); arrow.textContent = isOpen ? '▲' : '▼'; });
+    window.closeModal = function(modalId) { document.getElementById(modalId).style.display = 'none'; if(modalId === 'editModal') currentEditingId = null; };
+    window.openEditModal = function(id) { currentEditingId = id; const item = transportList.find(t => t.id === id); modalTitle.textContent = `Имя для (${item.type}): ${item.originalName}`; customNameInput.value = item.customName; editModal.style.display = 'flex'; customNameInput.focus(); };
+
+    document.getElementById('btnSaveEdit').addEventListener('click', () => {
+        if (currentEditingId !== null) { 
+            const item = transportList.find(t => t.id === currentEditingId); 
+            item.customName = customNameInput.value.trim(); 
+            saveToStorage(); 
+            renderTransportList(); 
+            renderResults(); 
+            closeModal('editModal'); 
+        }
+    });
+    document.getElementById('btnOpenAddModal').addEventListener('click', () => { newCarNameInput.value = ''; typeSelect.selectedIndex = 0; addModal.style.display = 'flex'; newCarNameInput.focus(); });
+    
+    document.getElementById('btnSaveNewCar').addEventListener('click', () => {
+        const name = newCarNameInput.value.trim(); if (!name) return alert('Введи название!');
+        const isDuplicate = transportList.some(item => item.originalName.toLowerCase() === name.toLowerCase());
+        if (isDuplicate) {
+            const confirmAdd = confirm('Данная модель уже зарегистрирована. Добавить ещё раз?');
+            if (!confirmAdd) return; 
+        }
+        const newId = transportList.length > 0 ? Math.max(...transportList.map(t => t.id)) + 1 : 1;
+        transportList.push({ id: newId, originalName: name, customName: "", type: typeSelect.value });
+        saveToStorage(); renderTransportList(); renderResults(); closeModal('addModal'); accordionContent.classList.add('open'); arrow.textContent = '▲';
+    });
+
+    searchInput.addEventListener('input', renderResults);
+    renderTransportList();
+</script>
+</body>
+</html>
